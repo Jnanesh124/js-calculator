@@ -6,7 +6,7 @@ expertMode = true
 channel = "stable-25_05"
 
 [workflows]
-runButton = "Project"
+runButton = "Full MovieStream (Website + Bot)"
 
 [[workflows.workflow]]
 name = "Project"
@@ -41,6 +41,19 @@ args = "npm install"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm start"
+
+[[workflows.workflow]]
+name = "Full MovieStream (Website + Bot)"
+author = 48085381
+mode = "parallel"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m http.server 5000 --bind 0.0.0.0"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm install && npm start"
 
 [[ports]]
 localPort = 5000
