@@ -1,43 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<title>Mr.Calculator</title>
-		<link
-			href="https://fonts.googleapis.com/css?family=Open+Sans"
-			rel="stylesheet"
-		/>
-		<link
-			href="https://fonts.googleapis.com/css?family=Oxygen+Mono"
-			rel="stylesheet"
-		/>
-		<link rel="stylesheet" href="brain/css/style.css" />
-		<link rel="icon" type="image/png" href="brain/img/fav.png" />
-	</head>
-	<body>
-		<div id="calculator">
-			<div id="result">0</div>
-			<button onclick="cls();">AC</button>
-			<button onclick="num(this.innerHTML);">7</button>
-			<button onclick="num(this.innerHTML);">8</button>
-			<button onclick="num(this.innerHTML);">9</button>
-			<button onclick="calc(this.innerHTML);">/</button>
-			<button onclick="num(this.innerHTML);">4</button>
-			<button onclick="num(this.innerHTML);">5</button>
-			<button onclick="num(this.innerHTML);">6</button>
-			<button onclick="calc(this.innerHTML);">*</button>
-			<button onclick="num(this.innerHTML);">1</button>
-			<button onclick="num(this.innerHTML);">2</button>
-			<button onclick="num(this.innerHTML);">3</button>
-			<button onclick="calc(this.innerHTML);">-</button>
-			<button onclick="num(this.innerHTML);">0</button>
-			<button onclick="num(this.innerHTML);">.</button>
-			<button onclick="total();">=</button>
-			<button onclick="calc(this.innerHTML);">+</button>
-			<div id="smallResult"></div>
-		</div>
-		<script src="brain/js/script.js"></script>
-	</body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>MovieStream - Watch Latest Movies</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet"
+    />
+    <link rel="stylesheet" href="brain/css/style.css" />
+    <link rel="icon" type="image/png" href="brain/img/fav.png" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-container">
+            <h1 class="logo">MovieStream</h1>
+            <nav class="nav-menu">
+                <a href="#" class="nav-link">Home</a>
+                <a href="#" class="nav-link">Movies</a>
+                <a href="#" class="nav-link">TV Shows</a>
+                <a href="#" class="nav-link">Search</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section class="hero-section">
+            <h2 class="hero-title">Latest Movies</h2>
+            <p class="hero-subtitle">Discover and watch the newest blockbusters</p>
+        </section>
+
+        <section class="movies-grid">
+            <div class="movie-card" data-movie="1">
+                <div class="movie-poster">
+                    <img src="attached_assets/stock_images/movie_poster_action__ecc378ce.jpg" alt="Action Adventure Movie" />
+                    <div class="movie-overlay">
+                        <button class="play-btn">▶ Play</button>
+                    </div>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Thunder Strike</h3>
+                    <p class="movie-description">Action • Adventure • 2024</p>
+                    <p class="movie-rating">⭐ 8.5/10</p>
+                </div>
+            </div>
+
+            <div class="movie-card" data-movie="2">
+                <div class="movie-poster">
+                    <img src="attached_assets/stock_images/movie_poster_action__94f678d3.jpg" alt="Epic Adventure Movie" />
+                    <div class="movie-overlay">
+                        <button class="play-btn">▶ Play</button>
+                    </div>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Lost Kingdom</h3>
+                    <p class="movie-description">Fantasy • Adventure • 2024</p>
+                    <p class="movie-rating">⭐ 9.2/10</p>
+                </div>
+            </div>
+
+            <div class="movie-card" data-movie="3">
+                <div class="movie-poster">
+                    <img src="attached_assets/stock_images/movie_poster_action__b3592372.jpg" alt="Thriller Movie" />
+                    <div class="movie-overlay">
+                        <button class="play-btn">▶ Play</button>
+                    </div>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Shadow Hunter</h3>
+                    <p class="movie-description">Thriller • Action • 2024</p>
+                    <p class="movie-rating">⭐ 8.8/10</p>
+                </div>
+            </div>
+
+            <div class="movie-card" data-movie="4">
+                <div class="movie-poster">
+                    <img src="attached_assets/stock_images/movie_poster_action__547adce9.jpg" alt="Sci-Fi Movie" />
+                    <div class="movie-overlay">
+                        <button class="play-btn">▶ Play</button>
+                    </div>
+                </div>
+                <div class="movie-info">
+                    <h3 class="movie-title">Cyber Genesis</h3>
+                    <p class="movie-description">Sci-Fi • Action • 2024</p>
+                    <p class="movie-rating">⭐ 9.0/10</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="brain/js/script.js"></script>
+</body>
 </html>
