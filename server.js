@@ -9,7 +9,7 @@ const app = express();
 const port = 3000;
 
 // Telegram Bot Token - You'll need to get this from @BotFather
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || 'YOUR_BOT_TOKEN_HERE';
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '7999034847:AAEBOHzENqFZm1KqXWTjUHx7WlSaBFrRXJI';
 const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
 
 // Middleware
