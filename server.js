@@ -77,33 +77,42 @@ bot.onText(/\/start/, (msg) => {
 🎬 Welcome to MovieStream Bot!
 
 Commands:
-/addmovie - Add a new movie (follow the prompts)
+/addmovie - Auto add movie (just send poster with movie info!)
 /listmovies - View all movies
 /help - Show this help message
 
-To add a movie, use /addmovie and I'll guide you through the process!
+Super Easy Upload:
+1. Type /addmovie
+2. Send your movie poster with title and links
+3. Bot automatically extracts everything!
     `);
 });
 
 bot.onText(/\/help/, (msg) => {
     const chatId = msg.chat.id;
     bot.sendMessage(chatId, `
-🎬 MovieStream Bot Commands:
+🎬 MovieStream Bot - Auto Upload!
 
 /start - Welcome message
-/addmovie - Add a new movie
+/addmovie - Auto add movie from poster
 /listmovies - View all uploaded movies
 /help - Show this help
 
-To add a movie:
+🚀 Super Simple Process:
 1. Type /addmovie
-2. Send movie title
-3. Send movie genre
-4. Send movie rating (e.g., 8.5)
-5. Send movie poster image
-6. Send movie description
+2. Send movie poster image with caption containing:
+   - Movie title
+   - Download links
+   - Any other movie info
 
-Your movie will be automatically added to the website!
+The bot will automatically:
+✅ Extract movie title
+✅ Detect genre
+✅ Generate rating
+✅ Save download links
+✅ Add to website instantly!
+
+No more step-by-step process!
     `);
 });
 
@@ -128,10 +137,64 @@ bot.onText(/\/listmovies/, (msg) => {
 // Movie upload process
 const userSessions = {};
 
+// Function to parse movie information from text
+function parseMovieInfo(text) {
+    // Extract title - first line usually contains the title
+    const lines = text.split('\n').filter(line => line.trim());
+    let title = lines[0] || 'Unknown Movie';
+    
+    // Clean up title - remove extra info after year pattern
+    title = title.replace(/\s+\d{4}\s+.*$/, '').trim();
+    
+    // Extract links
+    const links = [];
+    const linkRegex = /https?:\/\/[^\s]+/g;
+    const foundLinks = text.match(linkRegex);
+    if (foundLinks) {
+        links.push(...foundLinks);
+    }
+    
+    // Extract quality information
+    const qualityRegex = /(\d{3,4}p)/gi;
+    const qualities = text.match(qualityRegex) || [];
+    
+    // Determine genre based on common keywords
+    let genre = 'Action';
+    const genreKeywords = {
+        'Action': ['action', 'fight', 'battle', 'war', 'combat'],
+        'Comedy': ['comedy', 'funny', 'humor', 'laugh'],
+        'Drama': ['drama', 'emotional', 'story'],
+        'Horror': ['horror', 'scary', 'fear', 'zombie'],
+        'Sci-Fi': ['sci-fi', 'science', 'future', 'space', 'alien'],
+        'Romance': ['romance', 'love', 'romantic'],
+        'Thriller': ['thriller', 'suspense', 'mystery']
+    };
+    
+    const lowerText = text.toLowerCase();
+    for (const [genreName, keywords] of Object.entries(genreKeywords)) {
+        if (keywords.some(keyword => lowerText.includes(keyword))) {
+            genre = genreName;
+            break;
+        }
+    }
+    
+    // Generate random rating between 7.5 and 9.5
+    const rating = (Math.random() * 2 + 7.5).toFixed(1);
+    
+    return {
+        title,
+        genre: `${genre} • Adventure`,
+        rating: parseFloat(rating),
+        description: `High-quality ${genre.toLowerCase()} movie with stunning visuals and engaging storyline.`,
+        links,
+        qualities
+    };
+}
+
 bot.onText(/\/addmovie/, (msg) => {
     const chatId = msg.chat.id;
-    userSessions[chatId] = { step: 'title' };
-    bot.sendMessage(chatId, '🎬 Let\'s add a new movie!\n\nPlease send the movie title:');
+    userSessions[chatId] = { step: 'auto_upload' };
+    bot.sendMessage(chatId, '🎬 Ready for auto movie upload!\n\nSend your movie post with poster image and I\'ll automatically extract all information!');
 });
 
 bot.on('message', (msg) => {
@@ -142,92 +205,86 @@ bot.on('message', (msg) => {
     
     if (msg.text && msg.text.startsWith('/')) return;
     
-    switch (session.step) {
-        case 'title':
-            session.title = msg.text;
-            session.step = 'genre';
-            bot.sendMessage(chatId, `✅ Title: "${msg.text}"\n\nNow send the genre (e.g., "Action • Adventure"):`);
-            break;
+    // Handle auto upload mode
+    if (session.step === 'auto_upload' && msg.photo) {
+        // Parse movie information from caption or previous message
+        const movieText = msg.caption || session.lastText || 'Unknown Movie';
+        const movieInfo = parseMovieInfo(movieText);
+        
+        // Store parsed info in session
+        session.title = movieInfo.title;
+        session.genre = movieInfo.genre;
+        session.rating = movieInfo.rating;
+        session.description = movieInfo.description;
+        session.links = movieInfo.links;
+        session.step = 'processing_poster';
+        
+        bot.sendMessage(chatId, `🎬 Auto-detected movie info:\n\n📽️ Title: ${movieInfo.title}\n🎭 Genre: ${movieInfo.genre}\n⭐ Rating: ${movieInfo.rating}/10\n🔗 Links found: ${movieInfo.links.length}\n\nProcessing poster...`);
+        
+        // Process the poster image
+        const photo = msg.photo[msg.photo.length - 1];
+        const fileId = photo.file_id;
+        
+        bot.getFile(fileId).then((file) => {
+            const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${file.file_path}`;
+            const fileName = `movie_poster_${Date.now()}_${Math.round(Math.random() * 1E9)}.jpg`;
+            const filePath = path.join('attached_assets/uploaded_movies', fileName);
             
-        case 'genre':
-            session.genre = msg.text;
-            session.step = 'rating';
-            bot.sendMessage(chatId, `✅ Genre: "${msg.text}"\n\nNow send the rating (e.g., 8.5):`);
-            break;
-            
-        case 'rating':
-            const rating = parseFloat(msg.text);
-            if (isNaN(rating) || rating < 0 || rating > 10) {
-                bot.sendMessage(chatId, '❌ Please enter a valid rating between 0 and 10:');
-                return;
+            // Create directory if it doesn't exist
+            const uploadDir = 'attached_assets/uploaded_movies';
+            if (!fs.existsSync(uploadDir)) {
+                fs.mkdirSync(uploadDir, { recursive: true });
             }
-            session.rating = rating;
-            session.step = 'poster';
-            bot.sendMessage(chatId, `✅ Rating: ${rating}/10\n\nNow send the movie poster image:`);
-            break;
             
-        case 'description':
-            session.description = msg.text;
+            // Download and save the image
+            const https = require('https');
+            const fileStream = fs.createWriteStream(filePath);
             
-            // Create movie object
-            const newMovie = {
-                id: moviesData.length + 1,
-                title: session.title,
-                genre: session.genre,
-                rating: session.rating,
-                description: session.description,
-                poster: session.poster,
-                year: new Date().getFullYear(),
-                addedAt: new Date().toISOString()
-            };
-            
-            // Add to movies data
-            moviesData.push(newMovie);
-            saveMoviesData();
-            
-            // Update website
-            updateWebsite();
-            
-            bot.sendMessage(chatId, `🎉 Movie added successfully!\n\n🎬 "${newMovie.title}"\n📁 ${newMovie.genre}\n⭐ ${newMovie.rating}/10\n\nYour movie is now live on the website!`);
-            
-            // Clear session
-            delete userSessions[chatId];
-            break;
+            https.get(fileUrl, (response) => {
+                response.pipe(fileStream);
+                fileStream.on('finish', () => {
+                    // Create movie object
+                    const newMovie = {
+                        id: moviesData.length + 1,
+                        title: session.title,
+                        genre: session.genre,
+                        rating: session.rating,
+                        description: session.description,
+                        poster: `attached_assets/uploaded_movies/${fileName}`,
+                        year: new Date().getFullYear(),
+                        addedAt: new Date().toISOString(),
+                        links: session.links || []
+                    };
+                    
+                    // Add to movies data
+                    moviesData.push(newMovie);
+                    saveMoviesData();
+                    
+                    // Update website
+                    updateWebsite();
+                    
+                    bot.sendMessage(chatId, `🎉 Movie added automatically!\n\n🎬 "${newMovie.title}"\n📁 ${newMovie.genre}\n⭐ ${newMovie.rating}/10\n🔗 ${newMovie.links.length} download links saved\n\nYour movie is now live on the website!`);
+                    
+                    // Clear session
+                    delete userSessions[chatId];
+                });
+            });
+        }).catch((error) => {
+            bot.sendMessage(chatId, '❌ Error uploading poster. Please try again.');
+            console.error('Error downloading photo:', error);
+        });
+        
+        return;
+    }
+    
+    // Store text messages for context in auto upload mode
+    if (session.step === 'auto_upload' && msg.text) {
+        session.lastText = msg.text;
+        return;
     }
 });
 
-bot.on('photo', (msg) => {
-    const chatId = msg.chat.id;
-    const session = userSessions[chatId];
-    
-    if (!session || session.step !== 'poster') return;
-    
-    // Get the highest resolution photo
-    const photo = msg.photo[msg.photo.length - 1];
-    const fileId = photo.file_id;
-    
-    bot.getFile(fileId).then((file) => {
-        const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_BOT_TOKEN}/${file.file_path}`;
-        const fileName = `movie_poster_${Date.now()}_${Math.round(Math.random() * 1E9)}.jpg`;
-        const filePath = path.join('attached_assets/uploaded_movies', fileName);
-        
-        // Download and save the image
-        const https = require('https');
-        const fileStream = fs.createWriteStream(filePath);
-        
-        https.get(fileUrl, (response) => {
-            response.pipe(fileStream);
-            fileStream.on('finish', () => {
-                session.poster = `attached_assets/uploaded_movies/${fileName}`;
-                session.step = 'description';
-                bot.sendMessage(chatId, `✅ Poster uploaded!\n\nFinally, send a brief description of the movie:`);
-            });
-        });
-    }).catch((error) => {
-        bot.sendMessage(chatId, '❌ Error uploading poster. Please try again.');
-        console.error('Error downloading photo:', error);
-    });
-});
+
 
 // Function to update the website with new movies
 function updateWebsite() {
