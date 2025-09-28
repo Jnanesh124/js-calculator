@@ -1,175 +1,182 @@
 /* -------------------------
-    Calculator ...
+    MovieStream Website ...
 ---------------------------*/
-var result = document.getElementById('result');
-var smallResult = document.getElementById('smallResult');
-var cal = false;
-var val_1 = false;
-var val_2 = false;
-var oper = '+';
-var operPressed = false;
-var tot = 0;
-var cal_done = false;
-var currentStatus = 0;
-var o;
 
-function num(val) {
-	val = val.toString(); // converting to string so it won't be added together in display (2 + '2' should not do '22')
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    initializeMovieWebsite();
+});
 
-	if (cal_done)
-		// if calculation is done
-		cls(); // clear everything
-
-	if (!operPressed) {
-		// if no operator is pressed (means it's first value)
-		if (!val_1) val_1 = 0;
-
-		val_1 = val_1 + val;
-
-		val_1 = lengthFix(val_1); // limiting to 12
-
-		result.innerHTML = val_1;
-		smallResult.innerHTML = val_1;
-		// console.log('num to be calc: ' + val_1);
-	}
-	if (operPressed) {
-		// if operator is pressed (means it's 2nd value)
-		if (!val_2) val_2 = 0;
-
-		val_2 = val_2 + val;
-
-		val_2 = lengthFix(val_2); // limiting to 12
-
-		result.innerHTML = val_2;
-		smallResult.innerHTML = val_1 + oper + val_2;
-		// console.log('2nd num to be calc: ' + val_2);
-	}
+function initializeMovieWebsite() {
+    // Add event listeners to movie cards
+    const movieCards = document.querySelectorAll('.movie-card');
+    const playButtons = document.querySelectorAll('.play-btn');
+    
+    // Handle movie card interactions
+    movieCards.forEach((card, index) => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if clicking the play button
+            if (!e.target.closest('.play-btn')) {
+                showMovieDetails(index + 1);
+            }
+        });
+        
+        // Add hover effects
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-10px)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Handle play button clicks
+    playButtons.forEach((button, index) => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            playMovie(index + 1);
+        });
+    });
+    
+    // Add smooth scrolling for navigation links
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Add navigation functionality here if needed
+            console.log('Navigate to:', this.textContent);
+        });
+    });
+    
+    // Add search functionality simulation
+    setupSearchFeature();
+    
+    // Add loading animation completed
+    document.body.classList.add('loaded');
 }
 
-// when /,*,+,- is clicked
-function calc(val) {
-	if (val_1 && val_2) {
-		operPressed = true;
-		total();
-		oper = val;
-	}
-
-	if (cal_done) {
-		var x = (val_1 = tot);
-		cls();
-		val_1 = x;
-		val_1 = lengthFix(val_1); // limiting to 12
-		result.innerHTML = val; // display which operator is selected
-		// var a = smallResult.innerHTML.toString();
-		smallResult.innerHTML = +x + val;
-		oper = val;
-		operPressed = true;
-	}
-
-	if (!val_1 || operPressed) {
-		return false;
-	}
-
-	if (val_1 && !val_2) {
-		result.innerHTML = val; // display which operator is selected
-		var a = smallResult.innerHTML.toString();
-		smallResult.innerHTML = a + val;
-		oper = val;
-		operPressed = true;
-	}
+function showMovieDetails(movieId) {
+    const movieData = getMovieData(movieId);
+    
+    // Create modal or show details
+    console.log('Showing details for movie:', movieData.title);
+    
+    // Simple alert for demo - in real app would show a modal
+    alert(`Movie: ${movieData.title}\nGenre: ${movieData.genre}\nRating: ${movieData.rating}\n\nClick the play button to watch!`);
 }
 
-function total() {
-	if (!val_1) return false;
-
-	if (!val_2 && operPressed) {
-		tot = magic(val_1, val_1, oper);
-		tot = lengthFix(tot);
-	}
-
-	if (val_1 && val_2) {
-		tot = magic(val_1, val_2, oper);
-		tot = lengthFix(tot);
-	}
-
-	tot = tot.toString();
-	var noDec = tot.indexOf('.') == -1;
-	if (!noDec) tot = parseFloat(tot).toFixed(3);
-
-	result.innerHTML = tot;
-	// smallResult.innerHTML = tot;
-	// console.log('total: ' + tot);
+function playMovie(movieId) {
+    const movieData = getMovieData(movieId);
+    
+    console.log('Playing movie:', movieData.title);
+    
+    // Simulate movie playing
+    alert(`Now playing: ${movieData.title}\n\nIn a real app, this would start the video player.`);
+    
+    // Add visual feedback
+    const movieCard = document.querySelector(`[data-movie="${movieId}"]`);
+    if (movieCard) {
+        movieCard.style.border = '2px solid #4ecdc4';
+        setTimeout(() => {
+            movieCard.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+        }, 2000);
+    }
 }
 
-function magic(a, b, oper) {
-	switch (oper) {
-		case '+':
-			tot = +a + +b;
-			cal_done = true;
-			break;
-		case '-':
-			tot = +a - +b;
-			cal_done = true;
-			break;
-		case '/':
-			tot = +a / +b;
-			cal_done = true;
-			break;
-		case '*':
-			tot = +a * +b;
-			cal_done = true;
-			break;
-		default:
-			return false;
-	}
-	return tot;
+function getMovieData(movieId) {
+    const movies = {
+        1: {
+            title: 'Thunder Strike',
+            genre: 'Action • Adventure',
+            rating: '8.5/10',
+            year: '2024',
+            description: 'An epic action-adventure filled with thrilling scenes and stunning visuals.'
+        },
+        2: {
+            title: 'Lost Kingdom',
+            genre: 'Fantasy • Adventure',
+            rating: '9.2/10',
+            year: '2024',
+            description: 'A magical journey through mystical lands and ancient secrets.'
+        },
+        3: {
+            title: 'Shadow Hunter',
+            genre: 'Thriller • Action',
+            rating: '8.8/10',
+            year: '2024',
+            description: 'A gripping thriller with intense action and unexpected twists.'
+        },
+        4: {
+            title: 'Cyber Genesis',
+            genre: 'Sci-Fi • Action',
+            rating: '9.0/10',
+            year: '2024',
+            description: 'A futuristic sci-fi adventure exploring the digital frontier.'
+        }
+    };
+    
+    return movies[movieId] || movies[1];
 }
 
-// clearing everything...
-function cls() {
-	smallResult.innerHTML = '';
-	result.innerHTML = 0;
-	val_1 = false;
-	val_2 = false;
-	oper = '+';
-	tot = 0;
-	cal_done = false;
-	operPressed = false;
+function setupSearchFeature() {
+    // Simulate search functionality
+    const searchFeature = {
+        movies: ['Thunder Strike', 'Lost Kingdom', 'Shadow Hunter', 'Cyber Genesis'],
+        search: function(query) {
+            return this.movies.filter(movie => 
+                movie.toLowerCase().includes(query.toLowerCase())
+            );
+        }
+    };
+    
+    // Add to global scope for console testing
+    window.movieSearch = searchFeature;
 }
 
-function lengthFix(o) {
-	o = o.toString();
+// Add keyboard navigation
+document.addEventListener('keydown', function(e) {
+    // ESC key to close any modals (future feature)
+    if (e.key === 'Escape') {
+        console.log('ESC pressed - would close modal if open');
+    }
+    
+    // Number keys to select movies
+    if (e.key >= '1' && e.key <= '4') {
+        const movieId = parseInt(e.key);
+        showMovieDetails(movieId);
+    }
+    
+    // Space to play first movie (demo)
+    if (e.key === ' ') {
+        e.preventDefault();
+        playMovie(1);
+    }
+});
 
-	if (o != 0 || o != '0') {
-		if (o.charAt(0) == 0) o = o.slice(1);
-	}
+// Add smooth loading animation
+window.addEventListener('load', function() {
+    const movieCards = document.querySelectorAll('.movie-card');
+    movieCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+});
 
-	if (o.toString().length > 12) o = o.substring(0, 12);
-
-	return o;
-}
-
-document.onkeyup = function(e) {
-	if (e.which == 110 || e.which == 190) num('.');
-	if (e.which == 96 || e.which == 48) num('0');
-	if (e.which == 97 || e.which == 49) num('1');
-	if (e.which == 98 || e.which == 50) num('2');
-	if (e.which == 99 || e.which == 51) num('3');
-	if (e.which == 100 || e.which == 52) num('4');
-	if (e.which == 101 || e.which == 53) num('5');
-	if (e.which == 102 || e.which == 54) num('6');
-	if (e.which == 103 || e.which == 55) num('7');
-	if (e.which == 104 || e.which == 56) num('8');
-	if (e.which == 105 || e.which == 57) num('9');
-
-	if (e.which == 111) calc('/');
-	if (e.which == 106) calc('*');
-	if (e.which == 107) calc('+');
-	if (e.which == 109) calc('-');
-
-	if (e.which == 13) total();
-
-	if (e.which == 8 || e.which == 46) cls();
-
-	if (e.which == 27) cls();
-};
+// Initialize CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    .movie-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+    
+    .loaded .movie-card {
+        opacity: 1;
+        transform: translateY(0);
+    }
+`;
+document.head.appendChild(style);
